@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Solicitar cita — Dra. Nancy Romero</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --verde:#3A5A40; --salvia:#A3B18A; --beige:#F6F1E9;
+  --terracota:#D4A373; --blanco:#FEFAE0;
+  --texto:#1E293B; --texto-sec:#475569; --texto-ter:#94A3B8;
+  --borde:#E2E8F0; --radio:10px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-height:100vh;padding:0;}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+.header{background:var(--verde);padding:20px 20px 16px;color:var(--blanco);}
+.header-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.header-icon{width:40px;height:40px;border-radius:50%;background:rgba(254,250,224,.15);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.header-title{font-size:16px;font-weight:600;}
+.header-sub{font-size:12px;opacity:.75;margin-top:1px;}
+.header-desc{font-size:13px;opacity:.85;}
+
+/* STEPS */
+.steps{display:flex;background:#fff;border-bottom:1px solid var(--borde);padding:12px 20px;gap:0;}
+.step{flex:1;display:flex;align-items:center;gap:6px;}
+.step-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s;}
+.step-circle.done{background:var(--verde);color:#fff;}
+.step-circle.active{background:var(--verde);color:#fff;box-shadow:0 0 0 3px rgba(58,90,64,.2);}
+.step-circle.idle{background:var(--borde);color:var(--texto-ter);}
+.step-label{font-size:11px;font-weight:500;color:var(--texto-ter);white-space:nowrap;}
+.step-label.active{color:var(--verde);}
+.step-line{flex:1;height:1px;background:var(--borde);margin:0 4px;}
+
+/* CONTENT */
+.content{flex:1;padding:16px;display:flex;flex-direction:column;gap:0;}
+.pane{display:none;flex-direction:column;gap:14px;animation:fadeIn .2s ease;}
+.pane.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radio);padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+.card-title{font-size:13px;font-weight:600;color:var(--verde);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.field-label{font-size:11px;font-weight:600;color:var(--texto-ter);text-transform:uppercase;letter-spacing:.06em;}
+.inp,.sel{width:100%;background:var(--beige);border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--texto);font-family:inherit;transition:border-color .15s;-webkit-appearance:none;}
+.inp:focus,.sel:focus{outline:none;border-color:var(--verde);background:#fff;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* BOTONES */
+.btn{width:100%;padding:13px;font-size:14px;font-weight:600;font-family:inherit;border:none;border-radius:var(--radio);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;margin-top:4px;}
+.btn-primary{background:var(--verde);color:#fff;}
+.btn-primary:hover{background:#2d4632;}
+.btn-primary:active{transform:scale(.98);}
+.btn-back{background:var(--beige);color:var(--texto-sec);border:1px solid var(--borde);margin-top:8px;}
+
+/* CALENDARIO */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-mes{font-size:15px;font-weight:600;color:var(--texto);}
+.cal-nbtn{background:var(--beige);border:1px solid var(--borde);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--texto-sec);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-dow{font-size:10px;font-weight:600;color:var(--texto-ter);text-align:center;padding:4px 0;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:500;border:1.5px solid transparent;transition:all .15s;position:relative;background:var(--beige);}
+.cal-day:hover:not(.blocked):not(.past):not(.other){border-color:var(--salvia);background:#fff;}
+.cal-day.today{border-color:var(--verde);color:var(--verde);}
+.cal-day.selected{background:var(--verde);color:#fff;border-color:var(--verde);}
+.cal-day.blocked{background:#FCEBEB;color:#B91C1C;cursor:not-allowed;font-size:11px;}
+.cal-day.past{color:var(--borde);cursor:not-allowed;}
+.cal-day.other{color:var(--borde);cursor:default;}
+.cal-day.weekend{background:#F1F5F9;color:var(--texto-ter);cursor:not-allowed;}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--salvia);position:absolute;bottom:3px;}
+.cal-day.selected .cal-dot{background:rgba(254,250,224,.6);}
+
+.legenda{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--texto-sec);}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+/* HORARIOS */
+.hora-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.hora-btn{padding:10px 6px;font-size:13px;font-weight:500;font-family:inherit;border-radius:8px;border:1.5px solid var(--borde);background:#fff;color:var(--texto);cursor:pointer;text-align:center;transition:all .15s;}
+.hora-btn:hover:not(.hora-ocupada){border-color:var(--verde);color:var(--verde);}
+.hora-btn.hora-sel{background:var(--verde);color:#fff;border-color:var(--verde);}
+.hora-btn.hora-ocupada{background:#F1F5F9;color:var(--borde);cursor:not-allowed;text-decoration:line-through;font-size:11px;}
+
+/* RESUMEN */
+.res-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--beige);}
+.res-row:last-child{border-bottom:none;}
+.res-key{font-size:13px;color:var(--texto-sec);}
+.res-val{font-size:13px;font-weight:500;color:var(--texto);}
+
+/* ALERTA */
+.alert{border-radius:8px;padding:12px 14px;font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.alert-warn{background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;}
+.alert-err{background:#FEF2F2;color:#B91C1C;border:1px solid #FCA5A5;}
+
+/* SUCCESS */
+.success{text-align:center;padding:20px 10px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.success-icon{width:68px;height:68px;border-radius:50%;background:#ECFDF5;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.success-title{font-size:18px;font-weight:600;color:var(--texto);}
+.success-sub{font-size:13px;color:var(--texto-sec);line-height:1.6;}
+.codigo-box{background:var(--beige);border:1px solid var(--salvia);border-radius:8px;padding:10px 20px;font-size:20px;font-weight:700;letter-spacing:.12em;color:var(--verde);font-family:monospace;}
+
+/* LOADING */
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="header-icon">⚕️</div>
+      <div>
+        <div class="header-title">Dra. Nancy Romero</div>
+        <div class="header-sub">Médico General · Solicitud de cita</div>
+      </div>
+    </div>
+    <div class="header-desc">Complete el formulario para solicitar su cita. Le confirmaremos por correo o teléfono.</div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps" id="steps-bar" style="display:none;">
+    <div class="step">
+      <div class="step-circle active" id="sc-1">1</div>
+      <span class="step-label active" id="sl-1">Mis datos</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-circle idle" id="sc-2">2</div>
+      <span class="step-label" id="sl-2">Fecha</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-circle idle" id="sc-3">3</div>
+      <span class="step-label" id="sl-3">Confirmar</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PASO 0: CONSENTIMIENTO -->
+    <div class="pane active" id="pane-0">
+      <div class="card">
+        <div class="card-title" style="font-size:15px;">🔒 Aviso de privacidad y consentimiento</div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;display:flex;flex-direction:column;gap:12px;">
+          <p>Antes de continuar, por favor lea y acepte el siguiente aviso sobre el uso de sus datos personales.</p>
+
+          <div style="background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:14px;">
+            <p style="font-weight:600;color:#3A5A40;margin-bottom:8px;">¿Qué datos recopilamos?</p>
+            <p>Nombre, cédula, fecha de nacimiento, sexo, teléfono, correo electrónico, ARS y motivo de consulta.</p>
+          </div>
+
+          <div style="background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:14px;">
+            <p style="font-weight:600;color:#3A5A40;margin-bottom:8px;">¿Para qué se usan?</p>
+            <p>Exclusivamente para gestionar su atención médica en el consultorio de la <strong>Dra. Nancy Esther Romero Castro</strong>, Médico General (Exequátur 118-25 · CMD 57053). Sus datos no serán compartidos con terceros sin su consentimiento expreso.</p>
+          </div>
+
+          <div style="background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:14px;">
+            <p style="font-weight:600;color:#3A5A40;margin-bottom:8px;">Sus derechos</p>
+            <p>Tiene derecho a acceder, rectificar, cancelar u oponerse al uso de sus datos personales en cualquier momento, comunicándose directamente con el consultorio.</p>
+          </div>
+
+          <div style="background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:14px;">
+            <p style="font-weight:600;color:#3A5A40;margin-bottom:8px;">Base legal</p>
+            <p>El tratamiento de sus datos se realiza de conformidad con la <strong>Ley 172-13 sobre Protección de Datos Personales de la República Dominicana</strong> y el <strong>Código de Ética Médica del Colegio Médico Dominicano</strong>.</p>
+          </div>
+
+          <p style="font-size:12px;color:#94A3B8;">Al hacer clic en "Acepto y continuar", usted declara haber leído y entendido este aviso, y consiente el uso de sus datos para los fines descritos.</p>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <input type="checkbox" id="chk-consentimiento" style="width:18px;height:18px;accent-color:var(--verde);margin-top:1px;cursor:pointer;flex-shrink:0;">
+        <label for="chk-consentimiento" style="font-size:13px;color:#1E293B;cursor:pointer;line-height:1.5;">
+          He leído y acepto el aviso de privacidad. Consiento el uso de mis datos personales para gestionar mi atención médica.
+        </label>
+      </div>
+
+      <div id="alert-p0"></div>
+      <button class="btn btn-primary" onclick="aceptarConsentimiento()">Acepto y continuar →</button>
+    </div>
+
+    <!-- PASO 1: DATOS -->
+    <div class="pane" id="pane-1">
+      <div class="card">
+        <div class="card-title">📋 Sus datos personales</div>
+        <div class="grid-2">
+          <div class="field"><div class="field-label">Nombre(s) *</div><input class="inp" id="p-nombre" placeholder="Nombre..."></div>
+          <div class="field"><div class="field-label">Apellido(s) *</div><input class="inp" id="p-apellido" placeholder="Apellido..."></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><div class="field-label">Cédula</div><input class="inp" id="p-cedula" placeholder="000-0000000-0"></div>
+          <div class="field"><div class="field-label">Fecha de nacimiento</div><input class="inp" id="p-fnac" type="date"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><div class="field-label">Sexo</div>
+            <select class="sel" id="p-sexo">
+              <option value="">Seleccionar...</option>
+              <option>Masculino</option><option>Femenino</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Teléfono *</div><input class="inp" id="p-tel" type="tel" placeholder="(809) 000-0000"></div>
+        </div>
+        <div class="field"><div class="field-label">Correo electrónico</div><input class="inp" id="p-email" type="email" placeholder="correo@ejemplo.com"></div>
+        <div class="field"><div class="field-label">ARS / Seguro médico</div>
+          <select class="sel" id="p-ars">
+            <option value="">Seleccionar...</option>
+            <option>ARS Salud Segura</option><option>ARS Semma</option><option>ARS Futuro</option>
+            <option>ARS Universal</option><option>ARS Humano</option><option>ARS Reservas</option>
+            <option>ARS APS</option><option>ARS CMD</option><option>ARS Yunen</option>
+            <option>ARS Senasa</option><option>ARS Plan Básico</option><option>ARS Meta Salud</option>
+            <option>ARS Simag</option><option>ARS Uasd</option><option>Ninguna / Particular</option>
+          </select>
+        </div>
+        <div class="field"><div class="field-label">Tipo de consulta</div>
+          <select class="sel" id="p-tipo">
+            <option>Primera consulta</option>
+            <option>Consulta subsecuente</option>
+            <option>Revisión de resultados</option>
+            <option>Urgencia</option>
+          </select>
+        </div>
+        <div class="field"><div class="field-label">Motivo de consulta</div><input class="inp" id="p-motivo" placeholder="¿Por qué desea consultar?"></div>
+      </div>
+      <div id="alert-p1"></div>
+      <button class="btn btn-primary" onclick="irPaso2()">Continuar →</button>
+    </div>
+
+    <!-- PASO 2: FECHA Y HORA -->
+    <div class="pane" id="pane-2">
+      <div class="card">
+        <div class="card-title">📅 Seleccione fecha</div>
+        <div class="cal-nav">
+          <button class="cal-nbtn" onclick="calNav(-1)">‹</button>
+          <span class="cal-mes" id="cal-mes"></span>
+          <button class="cal-nbtn" onclick="calNav(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-dow"></div>
+        <div class="cal-grid" id="cal-days" style="margin-top:3px;"></div>
+        <div class="legenda">
+          <div class="leg"><div class="leg-dot" style="background:var(--beige);border:1px solid var(--salvia);"></div>Disponible</div>
+          <div class="leg"><div class="leg-dot" style="background:#FCEBEB;"></div>Sin cupos</div>
+          <div class="leg"><div class="leg-dot" style="background:#F1F5F9;"></div>No laborable</div>
+        </div>
+      </div>
+
+      <div class="card" id="card-horas" style="display:none;">
+        <div class="card-title">🕐 Seleccione hora — <span id="fecha-sel-label" style="font-weight:400;color:var(--texto-sec);"></span></div>
+        <div class="hora-grid" id="hora-grid"></div>
+      </div>
+
+      <div id="alert-p2"></div>
+      <button class="btn btn-primary" onclick="irPaso3()">Continuar →</button>
+      <button class="btn btn-back" onclick="irPaso(1)">← Volver</button>
+    </div>
+
+    <!-- PASO 3: CONFIRMAR -->
+    <div class="pane" id="pane-3">
+      <div class="card">
+        <div class="card-title">✅ Confirme su solicitud</div>
+        <div id="resumen"></div>
+      </div>
+      <div class="alert alert-warn">
+        ⏳ Su cita quedará <strong>pendiente de confirmación</strong>. La Dra. Romero le confirmará por teléfono o correo.
+      </div>
+      <div id="alert-p3"></div>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviarSolicitud()">Enviar solicitud</button>
+      <button class="btn btn-back" onclick="irPaso(2)">← Volver</button>
+    </div>
+
+    <!-- PASO 4: ÉXITO -->
+    <div class="pane" id="pane-4">
+      <div class="card">
+        <div class="success">
+          <div class="success-icon">✅</div>
+          <div class="success-title">¡Solicitud enviada!</div>
+          <div class="success-sub">Su código de referencia es:</div>
+          <div class="codigo-box" id="codigo-final">—</div>
+          <div class="success-sub">Guarde este código. La Dra. Romero confirmará su cita por teléfono o correo en las próximas horas.</div>
+          <button class="btn btn-primary" onclick="reiniciar()" style="margin-top:8px;">Nueva solicitud</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+const HORAS = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00'];
+
+let hoy = new Date();
+let calY = hoy.getFullYear(), calM = hoy.getMonth();
+let selFecha = null, selHora = null;
+let horasOcupadas = [];
+
+// STEPS
+function irPaso(n) {
+  // Manejar paso 0 (consentimiento) por separado
+  document.getElementById('pane-0')?.classList.remove('active');
+  [1,2,3,4].forEach(i => {
+    document.getElementById('pane-'+i)?.classList.remove('active');
+    const sc = document.getElementById('sc-'+i);
+    const sl = document.getElementById('sl-'+i);
+    if (!sc || !sl) return;
+    if (i < n) { sc.className='step-circle done'; sc.textContent='✓'; }
+    else if (i === n) { sc.className='step-circle active'; sc.textContent=i; sl.className='step-label active'; }
+    else { sc.className='step-circle idle'; sc.textContent=i; sl.className='step-label'; }
+  });
+  if (n === 0) {
+    document.getElementById('pane-0')?.classList.add('active');
+    document.getElementById('steps-bar').style.display='none';
+  } else {
+    document.getElementById('pane-'+n)?.classList.add('active');
+    document.getElementById('steps-bar').style.display='flex';
+  }
+  window.scrollTo(0,0);
+}
+
+function aceptarConsentimiento() {
+  const chk = document.getElementById('chk-consentimiento');
+  if (!chk.checked) {
+    document.getElementById('alert-p0').innerHTML = '<div class="alert alert-err">Debe aceptar el aviso de privacidad para continuar.</div>';
+    return;
+  }
+  document.getElementById('alert-p0').innerHTML = '';
+  irPaso(1);
+}
+
+function showAlert(id, tipo, msg) {
+  document.getElementById(id).innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+}
+function clearAlert(id) { document.getElementById(id).innerHTML=''; }
+
+function irPaso2() {
+  const nombre = document.getElementById('p-nombre').value.trim();
+  const apellido = document.getElementById('p-apellido').value.trim();
+  const tel = document.getElementById('p-tel').value.trim();
+  if (!nombre || !apellido || !tel) {
+    showAlert('alert-p1','err','Por favor completa nombre, apellido y teléfono.');
+    return;
+  }
+  clearAlert('alert-p1');
+  irPaso(2);
+  renderCal();
+}
+
+function irPaso3() {
+  if (!selFecha) { showAlert('alert-p2','err','Selecciona una fecha disponible.'); return; }
+  if (!selHora) { showAlert('alert-p2','err','Selecciona un horario.'); return; }
+  clearAlert('alert-p2');
+  const nombre = document.getElementById('p-nombre').value.trim();
+  const apellido = document.getElementById('p-apellido').value.trim();
+  const fecha = new Date(selFecha+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('resumen').innerHTML = `
+    <div class="res-row"><span class="res-key">Paciente</span><span class="res-val">${nombre} ${apellido}</span></div>
+    <div class="res-row"><span class="res-key">Cédula</span><span class="res-val">${document.getElementById('p-cedula').value||'—'}</span></div>
+    <div class="res-row"><span class="res-key">Teléfono</span><span class="res-val">${document.getElementById('p-tel').value}</span></div>
+    <div class="res-row"><span class="res-key">Correo</span><span class="res-val">${document.getElementById('p-email').value||'—'}</span></div>
+    <div class="res-row"><span class="res-key">Tipo de consulta</span><span class="res-val">${document.getElementById('p-tipo').value}</span></div>
+    <div class="res-row"><span class="res-key">Motivo</span><span class="res-val">${document.getElementById('p-motivo').value||'—'}</span></div>
+    <div class="res-row"><span class="res-key">Fecha</span><span class="res-val" style="text-transform:capitalize;">${fecha}</span></div>
+    <div class="res-row"><span class="res-key">Hora</span><span class="res-val">${selHora}</span></div>`;
+  irPaso(3);
+}
+
+async function enviarSolicitud() {
+  const btn = document.getElementById('btn-enviar');
+  btn.innerHTML = '<div class="spinner"></div> Enviando...';
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/api/solicitud', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        nombre: document.getElementById('p-nombre').value.trim(),
+        apellido: document.getElementById('p-apellido').value.trim(),
+        cedula: document.getElementById('p-cedula').value.trim()||null,
+        fecha_nacimiento: document.getElementById('p-fnac').value||null,
+        sexo: document.getElementById('p-sexo').value||null,
+        telefono: document.getElementById('p-tel').value.trim(),
+        email: document.getElementById('p-email').value.trim()||null,
+        ars: document.getElementById('p-ars').value||null,
+        motivo: document.getElementById('p-motivo').value.trim()||null,
+        tipo_consulta: document.getElementById('p-tipo').value,
+        fecha_solicitada: selFecha,
+        hora_solicitada: selHora
+      })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      document.getElementById('codigo-final').textContent = data.codigo;
+      irPaso(4);
+    } else {
+      showAlert('alert-p3','err', data.error || 'Error al enviar. Intente de nuevo.');
+      btn.innerHTML = 'Enviar solicitud';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showAlert('alert-p3','err','Error de conexión. Verifique su internet.');
+    btn.innerHTML = 'Enviar solicitud';
+    btn.disabled = false;
+  }
+}
+
+// CALENDARIO
+function calNav(d) {
+  calM += d;
+  if (calM < 0) { calM = 11; calY--; }
+  if (calM > 11) { calM = 0; calY++; }
+  renderCal();
+}
+
+function renderCal() {
+  document.getElementById('cal-mes').textContent = MESES[calM] + ' ' + calY;
+  const dow = document.getElementById('cal-dow');
+  dow.innerHTML = DIAS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  const grid = document.getElementById('cal-days'); grid.innerHTML = '';
+  const first = new Date(calY,calM,1).getDay();
+  const dim = new Date(calY,calM+1,0).getDate();
+  const dimp = new Date(calY,calM,0).getDate();
+  let cells = [];
+  for (let i=first-1;i>=0;i--) cells.push({d:dimp-i,cur:false});
+  for (let d=1;d<=dim;d++) cells.push({d,cur:true});
+  while (cells.length%7!==0) cells.push({d:cells.length-dim-first+1,cur:false});
+  const hoyDate = new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
+
+  cells.forEach(({d,cur}) => {
+    const div = document.createElement('div'); div.className='cal-day';
+    if (!cur) { div.classList.add('other'); div.textContent=d; grid.appendChild(div); return; }
+    const key = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const fecha = new Date(calY,calM,d);
+    const isPast = fecha < hoyDate;
+    const isToday = fecha.getTime() === hoyDate.getTime();
+    const isWeekend = fecha.getDay()===0||fecha.getDay()===6;
+    if (isToday) div.classList.add('today');
+    if (key===selFecha) div.classList.add('selected');
+    if (isPast) { div.classList.add('past'); div.textContent=d; grid.appendChild(div); return; }
+    if (isWeekend) { div.classList.add('weekend'); div.textContent=d; grid.appendChild(div); return; }
+    div.innerHTML = `<span>${d}</span><div class="cal-dot"></div>`;
+    div.addEventListener('click', () => seleccionarFecha(key, d));
+    grid.appendChild(div);
+  });
+}
+
+async function seleccionarFecha(key, d) {
+  selFecha = key; selHora = null;
+  renderCal();
+  // Obtener horas ocupadas del servidor
+  try {
+    const resp = await fetch(`/api/disponibilidad/${key}`);
+    const data = await resp.json();
+    horasOcupadas = data.ocupadas || [];
+  } catch(e) { horasOcupadas = []; }
+  renderHoras(key, d);
+  clearAlert('alert-p2');
+}
+
+function renderHoras(key, d) {
+  const card = document.getElementById('card-horas'); card.style.display='block';
+  const label = document.getElementById('fecha-sel-label');
+  label.textContent = `${d} de ${MESES[calM]}`;
+  const grid = document.getElementById('hora-grid');
+  grid.innerHTML = HORAS.map(h => {
+    const ocup = horasOcupadas.includes(h);
+    const sel = selHora===h;
+    return `<button class="hora-btn${ocup?' hora-ocupada':''}${sel?' hora-sel':''}"
+      onclick="${ocup?'':''}" ${ocup?'disabled':'onclick="selHora(\''+h+'\')"'}
+      aria-label="${h}${ocup?' ocupado':''}">${h}${ocup?'<br>✗':''}</button>`;
+  }).join('');
+}
+
+function selHora(h) {
+  selHora = h;
+  renderHoras(selFecha, new Date(selFecha+'T12:00:00').getDate());
+  clearAlert('alert-p2');
+}
+
+function reiniciar() {
+  ['p-nombre','p-apellido','p-cedula','p-tel','p-email','p-motivo'].forEach(id=>document.getElementById(id).value='');
+  ['p-sexo','p-ars','p-tipo'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  document.getElementById('p-fnac').value='';
+  // Desmarcar consentimiento
+  const chk = document.getElementById('chk-consentimiento');
+  if (chk) chk.checked = false;
+  selFecha=null; selHora=null; horasOcupadas=[];
+  document.getElementById('card-horas').style.display='none';
+  clearAlert('alert-p0'); clearAlert('alert-p1'); clearAlert('alert-p2'); clearAlert('alert-p3');
+  irPaso(0);
+}
+
+// Init
+renderCal();
+</script>
+</body>
+</html>
