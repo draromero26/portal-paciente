@@ -159,7 +159,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
       </div>
       <div class="grid-2">
         <div class="field"><div class="field-label">Cédula</div><input class="inp" id="p-cedula" placeholder="000-0000000-0"></div>
-        <div class="field"><div class="field-label">Fecha de nacimiento</div><input class="inp" id="p-fnac" type="date"></div>
+        <div class="field"><div class="field-label">Fecha de nacimiento *</div><input class="inp" id="p-fnac" type="date"></div>
       </div>
       <div class="grid-2">
         <div class="field"><div class="field-label">Sexo</div>
@@ -170,7 +170,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
         </div>
         <div class="field"><div class="field-label">Teléfono *</div><input class="inp" id="p-tel" type="tel" placeholder="(809) 000-0000"></div>
       </div>
-      <div class="field"><div class="field-label">Correo electrónico</div><input class="inp" id="p-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="field"><div class="field-label">Correo electrónico *</div><input class="inp" id="p-email" type="email" placeholder="correo@ejemplo.com"></div>
       <div class="field"><div class="field-label">ARS / Seguro médico</div>
         <select class="sel" id="p-ars">
           <option value="">Seleccionar...</option>
@@ -311,8 +311,22 @@ document.getElementById('btn-paso2').addEventListener('click', function() {
   var nombre = document.getElementById('p-nombre').value.trim();
   var apellido = document.getElementById('p-apellido').value.trim();
   var tel = document.getElementById('p-tel').value.trim();
-  if (!nombre || !apellido || !tel) {
-    showAlert('alert-p1', 'err', 'Por favor completa nombre, apellido y teléfono.');
+  var email = document.getElementById('p-email').value.trim();
+  var fnac = document.getElementById('p-fnac').value.trim();
+  var errores = [];
+  if (!nombre) errores.push('Nombre');
+  if (!apellido) errores.push('Apellido');
+  if (!tel) errores.push('Teléfono');
+  if (!email) errores.push('Correo electrónico');
+  if (!fnac) errores.push('Fecha de nacimiento');
+  if (errores.length > 0) {
+    showAlert('alert-p1', 'err', 'Los siguientes campos son obligatorios: <strong>' + errores.join(', ') + '</strong>');
+    return;
+  }
+  // Validar formato de correo
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showAlert('alert-p1', 'err', 'Por favor ingresa un correo electrónico válido.');
     return;
   }
   clearAlert('alert-p1');
