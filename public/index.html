@@ -6,12 +6,7 @@
 <title>Solicitar cita — Dra. Nancy Romero</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --verde:#3A5A40;--salvia:#A3B18A;--beige:#F6F1E9;
-  --terracota:#D4A373;--blanco:#FEFAE0;
-  --texto:#1E293B;--texto-sec:#475569;--texto-ter:#94A3B8;
-  --borde:#E2E8F0;--radio:10px;
-}
+:root{--verde:#3A5A40;--salvia:#A3B18A;--beige:#F6F1E9;--blanco:#FEFAE0;--texto:#1E293B;--texto-sec:#475569;--texto-ter:#94A3B8;--borde:#E2E8F0;--radio:10px;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-height:100vh;}
 .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
 .header{background:var(--verde);padding:20px 20px 16px;color:var(--blanco);}
@@ -20,9 +15,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
 .header-title{font-size:16px;font-weight:600;}
 .header-sub{font-size:12px;opacity:.75;margin-top:1px;}
 .header-desc{font-size:13px;opacity:.85;}
-.steps{display:flex;background:#fff;border-bottom:1px solid var(--borde);padding:12px 20px;gap:0;}
+.steps{display:flex;background:#fff;border-bottom:1px solid var(--borde);padding:12px 20px;}
 .step{flex:1;display:flex;align-items:center;gap:6px;}
-.step-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s;}
+.step-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
 .step-circle.done{background:var(--verde);color:#fff;}
 .step-circle.active{background:var(--verde);color:#fff;box-shadow:0 0 0 3px rgba(58,90,64,.2);}
 .step-circle.idle{background:var(--borde);color:var(--texto-ter);}
@@ -36,51 +31,62 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
 .card-title{font-size:13px;font-weight:600;color:var(--verde);margin-bottom:12px;}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
 .field-label{font-size:11px;font-weight:600;color:var(--texto-ter);text-transform:uppercase;letter-spacing:.06em;}
-.inp,.sel{width:100%;background:var(--beige);border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--texto);font-family:inherit;transition:border-color .15s;-webkit-appearance:none;}
+.inp,.sel{width:100%;background:var(--beige);border:1px solid var(--borde);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--texto);font-family:inherit;-webkit-appearance:none;}
 .inp:focus,.sel:focus{outline:none;border-color:var(--verde);background:#fff;}
+.inp:read-only{background:#F1F5F9;color:var(--texto-sec);}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .btn{width:100%;padding:13px;font-size:14px;font-weight:600;font-family:inherit;border:none;border-radius:var(--radio);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;margin-top:4px;}
 .btn-primary{background:var(--verde);color:#fff;}
 .btn-primary:hover{background:#2d4632;}
+.btn-primary:disabled{background:#94A3B8;cursor:not-allowed;}
 .btn-back{background:var(--beige);color:var(--texto-sec);border:1px solid var(--borde);margin-top:8px;}
+.btn-outline{background:#fff;color:var(--verde);border:1.5px solid var(--verde);margin-top:8px;}
+.cedula-search{display:flex;gap:8px;margin-bottom:4px;}
+.cedula-search .inp{flex:1;margin-bottom:0;}
+.cedula-search button{padding:10px 16px;background:var(--verde);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.paciente-encontrado{background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.paciente-encontrado-icon{font-size:20px;}
+.paciente-encontrado-info{flex:1;}
+.paciente-encontrado-nombre{font-size:14px;font-weight:600;color:#065F46;}
+.paciente-encontrado-meta{font-size:12px;color:#047857;margin-top:2px;}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .cal-mes{font-size:15px;font-weight:600;color:var(--texto);}
-.cal-nbtn{background:var(--beige);border:1px solid var(--borde);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--texto-sec);}
+.cal-nbtn{background:var(--beige);border:1px solid var(--borde);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
 .cal-dow{font-size:10px;font-weight:600;color:var(--texto-ter);text-align:center;padding:4px 0;text-transform:uppercase;}
-.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:500;border:1.5px solid transparent;transition:all .15s;background:var(--beige);}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:500;border:1.5px solid transparent;background:var(--beige);}
 .cal-day:hover:not(.blocked):not(.past):not(.other):not(.weekend){border-color:var(--salvia);background:#fff;}
 .cal-day.today{border-color:var(--verde);color:var(--verde);}
 .cal-day.selected{background:var(--verde);color:#fff;border-color:var(--verde);}
 .cal-day.blocked{background:#FCEBEB;color:#B91C1C;cursor:not-allowed;}
-.cal-day.past{color:var(--borde);cursor:not-allowed;}
-.cal-day.other{color:var(--borde);cursor:default;}
-.cal-day.weekend{background:#F1F5F9;color:var(--texto-ter);cursor:not-allowed;}
+.cal-day.past,.cal-day.other,.cal-day.weekend{color:var(--borde);cursor:not-allowed;}
+.cal-day.weekend{background:#F1F5F9;}
+.hora-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.hora-btn{padding:10px 6px;font-size:13px;font-weight:500;font-family:inherit;border-radius:8px;border:1.5px solid var(--borde);background:#fff;color:var(--texto);cursor:pointer;text-align:center;}
+.hora-btn:hover:not(.hora-ocupada){border-color:var(--verde);color:var(--verde);}
+.hora-btn.hora-sel{background:var(--verde);color:#fff;border-color:var(--verde);}
+.hora-btn.hora-ocupada{background:#F1F5F9;color:var(--borde);cursor:not-allowed;}
 .legenda{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
 .leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--texto-sec);}
 .leg-dot{width:10px;height:10px;border-radius:3px;}
-.hora-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.hora-btn{padding:10px 6px;font-size:13px;font-weight:500;font-family:inherit;border-radius:8px;border:1.5px solid var(--borde);background:#fff;color:var(--texto);cursor:pointer;text-align:center;transition:all .15s;}
-.hora-btn:hover:not(.hora-ocupada){border-color:var(--verde);color:var(--verde);}
-.hora-btn.hora-sel{background:var(--verde);color:#fff;border-color:var(--verde);}
-.hora-btn.hora-ocupada{background:#F1F5F9;color:var(--borde);cursor:not-allowed;font-size:11px;}
 .res-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--beige);}
 .res-row:last-child{border-bottom:none;}
 .res-key{font-size:13px;color:var(--texto-sec);}
 .res-val{font-size:13px;font-weight:500;color:var(--texto);}
-.alert{border-radius:8px;padding:12px 14px;font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.alert{border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:4px;}
 .alert-warn{background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;}
 .alert-err{background:#FEF2F2;color:#B91C1C;border:1px solid #FCA5A5;}
+.alert-ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
 .success{text-align:center;padding:20px 10px;display:flex;flex-direction:column;align-items:center;gap:12px;}
 .success-icon{width:68px;height:68px;border-radius:50%;background:#ECFDF5;display:flex;align-items:center;justify-content:center;font-size:32px;}
 .success-title{font-size:18px;font-weight:600;color:var(--texto);}
 .success-sub{font-size:13px;color:var(--texto-sec);line-height:1.6;}
 .codigo-box{background:var(--beige);border:1px solid var(--salvia);border-radius:8px;padding:10px 20px;font-size:20px;font-weight:700;letter-spacing:.12em;color:var(--verde);font-family:monospace;}
-.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.priv-bloque{background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:14px;margin-bottom:10px;}
-.priv-bloque h4{font-weight:600;color:#3A5A40;margin-bottom:6px;font-size:13px;}
-.priv-bloque p{font-size:13px;color:#475569;line-height:1.6;}
+.priv-bloque{background:#F6F1E9;border-left:3px solid #3A5A40;border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:10px;}
+.priv-bloque h4{font-weight:600;color:#3A5A40;margin-bottom:4px;font-size:13px;}
+.priv-bloque p{font-size:12px;color:#475569;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -94,24 +100,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
       <div class="header-sub">Médico General &middot; Solicitud de cita</div>
     </div>
   </div>
-  <div class="header-desc">Complete el formulario para solicitar su cita. Le confirmaremos por correo o teléfono.</div>
+  <div class="header-desc">Solicite su cita en línea. Le confirmaremos por correo o teléfono.</div>
 </div>
 
 <div class="steps" id="steps-bar" style="display:none;">
-  <div class="step">
-    <div class="step-circle active" id="sc-1">1</div>
-    <span class="step-label active" id="sl-1">Mis datos</span>
-  </div>
+  <div class="step"><div class="step-circle active" id="sc-1">1</div><span class="step-label active" id="sl-1">Datos</span></div>
   <div class="step-line"></div>
-  <div class="step">
-    <div class="step-circle idle" id="sc-2">2</div>
-    <span class="step-label" id="sl-2">Fecha</span>
-  </div>
+  <div class="step"><div class="step-circle idle" id="sc-2">2</div><span class="step-label" id="sl-2">Fecha</span></div>
   <div class="step-line"></div>
-  <div class="step">
-    <div class="step-circle idle" id="sc-3">3</div>
-    <span class="step-label" id="sl-3">Confirmar</span>
-  </div>
+  <div class="step"><div class="step-circle idle" id="sc-3">3</div><span class="step-label" id="sl-3">Confirmar</span></div>
 </div>
 
 <div class="content">
@@ -119,40 +116,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
   <!-- PASO 0: CONSENTIMIENTO -->
   <div class="pane active" id="pane-0">
     <div class="card">
-      <div class="card-title" style="font-size:15px;">&#128274; Aviso de privacidad y consentimiento</div>
+      <div class="card-title" style="font-size:15px;">&#128274; Aviso de privacidad</div>
       <p style="font-size:13px;color:#475569;margin-bottom:12px;">Antes de continuar, lea y acepte el uso de sus datos personales.</p>
-      <div class="priv-bloque">
-        <h4>Datos que recopilamos</h4>
-        <p>Nombre, cédula, fecha de nacimiento, sexo, teléfono, correo y motivo de consulta.</p>
-      </div>
-      <div class="priv-bloque">
-        <h4>Para qué se usan</h4>
-        <p>Exclusivamente para gestionar su atención médica en el consultorio de la <strong>Dra. Nancy Esther Romero Castro</strong>, Médico General (Exequátur 118-25 &middot; CMD 57053). Sus datos no serán compartidos con terceros sin su consentimiento.</p>
-      </div>
-      <div class="priv-bloque">
-        <h4>Sus derechos</h4>
-        <p>Tiene derecho a acceder, rectificar o eliminar sus datos en cualquier momento contactando al consultorio.</p>
-      </div>
-      <div class="priv-bloque">
-        <h4>Base legal</h4>
-        <p>De conformidad con la <strong>Ley 172-13 de Protección de Datos Personales de la República Dominicana</strong> y el Código de Ética Médica del CMD.</p>
-      </div>
-      <p style="font-size:12px;color:#94A3B8;margin-top:10px;">Al hacer clic en "Acepto y continuar" usted consiente el uso de sus datos para los fines descritos.</p>
+      <div class="priv-bloque"><h4>Datos que recopilamos</h4><p>Nombre, cédula, fecha de nacimiento, sexo, teléfono, correo y motivo de consulta.</p></div>
+      <div class="priv-bloque"><h4>Para qué se usan</h4><p>Exclusivamente para gestionar su atención médica con la <strong>Dra. Nancy Esther Romero Castro</strong>, Médico General (Exequátur 118-25 · CMD 57053). Sus datos no serán compartidos con terceros.</p></div>
+      <div class="priv-bloque"><h4>Sus derechos</h4><p>Puede acceder, rectificar o eliminar sus datos contactando al consultorio.</p></div>
+      <div class="priv-bloque"><h4>Base legal</h4><p>Conforme a la <strong>Ley 172-13 de Protección de Datos Personales de la RD</strong> y el Código de Ética Médica del CMD.</p></div>
     </div>
     <div style="background:#fff;border:1px solid var(--borde);border-radius:var(--radio);padding:14px;display:flex;align-items:flex-start;gap:10px;">
-      <input type="checkbox" id="chk-consent" style="width:18px;height:18px;accent-color:var(--verde);margin-top:1px;cursor:pointer;flex-shrink:0;">
-      <label for="chk-consent" style="font-size:13px;color:#1E293B;cursor:pointer;line-height:1.5;">
-        He leído y acepto el aviso de privacidad. Consiento el uso de mis datos para gestionar mi atención médica.
-      </label>
+      <input type="checkbox" id="chk-consent" style="width:18px;height:18px;accent-color:var(--verde);margin-top:2px;cursor:pointer;flex-shrink:0;">
+      <label for="chk-consent" style="font-size:13px;color:#1E293B;cursor:pointer;line-height:1.5;">He leído y acepto el aviso de privacidad y consiento el uso de mis datos para gestionar mi atención médica.</label>
     </div>
     <div id="alert-p0"></div>
     <button class="btn btn-primary" id="btn-aceptar">Acepto y continuar &#8594;</button>
   </div>
 
-  <!-- PASO 1: DATOS -->
+  <!-- PASO 1: BÚSQUEDA O DATOS -->
   <div class="pane" id="pane-1">
-    <div class="card">
-      <div class="card-title">&#128203; Sus datos personales</div>
+
+    <!-- Búsqueda por cédula -->
+    <div class="card" id="card-cedula-search">
+      <div class="card-title">&#128269; ¿Ya ha visitado el consultorio antes?</div>
+      <p style="font-size:13px;color:var(--texto-sec);margin-bottom:12px;">Ingrese su cédula para verificar si ya tiene expediente. Si es primera vez, déjela en blanco y continúe.</p>
+      <div class="cedula-search">
+        <input class="inp" id="buscar-cedula" placeholder="Ej: 001-0000001-1" maxlength="13">
+        <button id="btn-buscar-cedula">Buscar</button>
+      </div>
+      <div id="resultado-busqueda"></div>
+    </div>
+
+    <!-- Formulario de datos -->
+    <div class="card" id="card-datos">
+      <div class="card-title" id="datos-titulo">&#128203; Sus datos personales</div>
       <div class="grid-2">
         <div class="field"><div class="field-label">Nombre(s) *</div><input class="inp" id="p-nombre" placeholder="Nombre..."></div>
         <div class="field"><div class="field-label">Apellido(s) *</div><input class="inp" id="p-apellido" placeholder="Apellido..."></div>
@@ -183,14 +178,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
       </div>
       <div class="field"><div class="field-label">Tipo de consulta</div>
         <select class="sel" id="p-tipo">
-          <option>Primera consulta</option>
-          <option>Consulta subsecuente</option>
-          <option>Revisión de resultados</option>
-          <option>Urgencia</option>
+          <option>Primera consulta</option><option>Consulta subsecuente</option>
+          <option>Revisión de resultados</option><option>Urgencia</option>
         </select>
       </div>
       <div class="field"><div class="field-label">Motivo de consulta</div><input class="inp" id="p-motivo" placeholder="¿Por qué desea consultar?"></div>
     </div>
+
     <div id="alert-p1"></div>
     <button class="btn btn-primary" id="btn-paso2">Continuar &#8594;</button>
   </div>
@@ -213,7 +207,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
       </div>
     </div>
     <div class="card" id="card-horas" style="display:none;">
-      <div class="card-title">&#128336; Seleccione hora &mdash; <span id="fecha-sel-label" style="font-weight:400;color:var(--texto-sec);"></span></div>
+      <div class="card-title">&#128336; Hora &mdash; <span id="fecha-sel-label" style="font-weight:400;color:var(--texto-sec);"></span></div>
       <div class="hora-grid" id="hora-grid"></div>
     </div>
     <div id="alert-p2"></div>
@@ -227,9 +221,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
       <div class="card-title">&#9989; Confirme su solicitud</div>
       <div id="resumen"></div>
     </div>
-    <div class="alert alert-warn">
-      &#8987; Su cita quedará <strong>pendiente de confirmación</strong>. La Dra. Romero le confirmará por teléfono o correo.
-    </div>
+    <div class="alert alert-warn">&#8987; Su cita quedará <strong>pendiente de confirmación</strong>. La Dra. Romero le confirmará por teléfono o correo.</div>
     <div id="alert-p3"></div>
     <button class="btn btn-primary" id="btn-enviar">Enviar solicitud</button>
     <button class="btn btn-back" id="btn-volver3">&#8592; Volver</button>
@@ -243,7 +235,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
         <div class="success-title">¡Solicitud enviada!</div>
         <div class="success-sub">Su código de referencia es:</div>
         <div class="codigo-box" id="codigo-final">—</div>
-        <div class="success-sub">Guarde este código. La Dra. Romero confirmará su cita por teléfono o correo en las próximas horas.</div>
+        <div class="success-sub">La Dra. Romero confirmará su cita por teléfono o correo en las próximas horas.</div>
         <button class="btn btn-primary" id="btn-nueva" style="margin-top:8px;">Nueva solicitud</button>
       </div>
     </div>
@@ -256,13 +248,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--beige);min-hei
 var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 var DIAS = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
 var HORAS = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00'];
-
 var hoy = new Date();
-var calY = hoy.getFullYear();
-var calM = hoy.getMonth();
-var fechaSeleccionada = null;
-var horaSeleccionada = null;
-var horasOcupadas = [];
+var calY = hoy.getFullYear(), calM = hoy.getMonth();
+var fechaSeleccionada = null, horaSeleccionada = null, horasOcupadas = [];
+var pacienteEncontrado = null; // datos del paciente si ya existe
 
 function irPaso(n) {
   document.getElementById('pane-0').classList.remove('active');
@@ -291,15 +280,11 @@ function showAlert(id, tipo, msg) {
   var el = document.getElementById(id);
   if (el) el.innerHTML = '<div class="alert alert-' + tipo + '">' + msg + '</div>';
 }
-function clearAlert(id) {
-  var el = document.getElementById(id);
-  if (el) el.innerHTML = '';
-}
+function clearAlert(id) { var el = document.getElementById(id); if (el) el.innerHTML = ''; }
 
-// Botones
+// CONSENTIMIENTO
 document.getElementById('btn-aceptar').addEventListener('click', function() {
-  var chk = document.getElementById('chk-consent');
-  if (!chk.checked) {
+  if (!document.getElementById('chk-consent').checked) {
     showAlert('alert-p0', 'err', 'Debe aceptar el aviso de privacidad para continuar.');
     return;
   }
@@ -307,6 +292,73 @@ document.getElementById('btn-aceptar').addEventListener('click', function() {
   irPaso(1);
 });
 
+// BÚSQUEDA POR CÉDULA
+document.getElementById('btn-buscar-cedula').addEventListener('click', buscarPaciente);
+document.getElementById('buscar-cedula').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') buscarPaciente();
+});
+
+function buscarPaciente() {
+  var cedula = document.getElementById('buscar-cedula').value.trim();
+  if (!cedula || cedula.replace(/[^0-9]/g, '').length < 6) {
+    document.getElementById('resultado-busqueda').innerHTML = '<div class="alert alert-err" style="margin-top:8px;">Ingrese una cédula válida.</div>';
+    return;
+  }
+  document.getElementById('btn-buscar-cedula').textContent = 'Buscando...';
+  document.getElementById('btn-buscar-cedula').disabled = true;
+  fetch('/api/paciente/' + encodeURIComponent(cedula))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('btn-buscar-cedula').textContent = 'Buscar';
+      document.getElementById('btn-buscar-cedula').disabled = false;
+      if (data.ok && data.existe) {
+        pacienteEncontrado = data.paciente;
+        var p = data.paciente;
+        // Mostrar paciente encontrado
+        document.getElementById('resultado-busqueda').innerHTML =
+          '<div class="paciente-encontrado" style="margin-top:8px;">' +
+          '<div class="paciente-encontrado-icon">&#9989;</div>' +
+          '<div class="paciente-encontrado-info">' +
+          '<div class="paciente-encontrado-nombre">' + p.nombre + ' ' + p.apellido + '</div>' +
+          '<div class="paciente-encontrado-meta">Cédula: ' + p.cedula + (p.telefono ? ' · Tel: ' + p.telefono : '') + '</div>' +
+          '</div></div>';
+        // Prellenar formulario con datos existentes (solo lectura)
+        document.getElementById('p-nombre').value = p.nombre || '';
+        document.getElementById('p-nombre').readOnly = true;
+        document.getElementById('p-apellido').value = p.apellido || '';
+        document.getElementById('p-apellido').readOnly = true;
+        document.getElementById('p-cedula').value = p.cedula || '';
+        document.getElementById('p-cedula').readOnly = true;
+        document.getElementById('p-fnac').value = p.fecha_nacimiento || '';
+        document.getElementById('p-tel').value = p.telefono || '';
+        document.getElementById('p-email').value = p.email || '';
+        if (p.sexo) document.getElementById('p-sexo').value = p.sexo;
+        if (p.ars) document.getElementById('p-ars').value = p.ars;
+        // Cambiar título
+        document.getElementById('datos-titulo').textContent = '📋 Confirme sus datos y motivo';
+      } else {
+        pacienteEncontrado = null;
+        document.getElementById('resultado-busqueda').innerHTML =
+          '<div class="alert alert-ok" style="margin-top:8px;">Cédula no encontrada. Por favor complete el formulario.</div>';
+        // Limpiar campos
+        document.getElementById('p-cedula').value = cedula;
+        ['p-nombre','p-apellido','p-fnac','p-tel','p-email'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (id !== 'p-cedula') { el.value = ''; el.readOnly = false; }
+        });
+        document.getElementById('p-nombre').readOnly = false;
+        document.getElementById('p-apellido').readOnly = false;
+      }
+    })
+    .catch(function() {
+      document.getElementById('btn-buscar-cedula').textContent = 'Buscar';
+      document.getElementById('btn-buscar-cedula').disabled = false;
+      document.getElementById('resultado-busqueda').innerHTML =
+        '<div class="alert alert-err" style="margin-top:8px;">Error de conexión. Complete el formulario manualmente.</div>';
+    });
+}
+
+// CONTINUAR A FECHA
 document.getElementById('btn-paso2').addEventListener('click', function() {
   var nombre = document.getElementById('p-nombre').value.trim();
   var apellido = document.getElementById('p-apellido').value.trim();
@@ -320,13 +372,11 @@ document.getElementById('btn-paso2').addEventListener('click', function() {
   if (!email) errores.push('Correo electrónico');
   if (!fnac) errores.push('Fecha de nacimiento');
   if (errores.length > 0) {
-    showAlert('alert-p1', 'err', 'Los siguientes campos son obligatorios: <strong>' + errores.join(', ') + '</strong>');
+    showAlert('alert-p1', 'err', 'Campos obligatorios: <strong>' + errores.join(', ') + '</strong>');
     return;
   }
-  // Validar formato de correo
-  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    showAlert('alert-p1', 'err', 'Por favor ingresa un correo electrónico válido.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAlert('alert-p1', 'err', 'Ingrese un correo electrónico válido.');
     return;
   }
   clearAlert('alert-p1');
@@ -334,6 +384,10 @@ document.getElementById('btn-paso2').addEventListener('click', function() {
   renderCal();
 });
 
+document.getElementById('btn-volver2').addEventListener('click', function() { irPaso(1); });
+document.getElementById('btn-volver3').addEventListener('click', function() { irPaso(2); });
+
+// CONTINUAR A CONFIRMAR
 document.getElementById('btn-paso3').addEventListener('click', function() {
   if (!fechaSeleccionada) { showAlert('alert-p2', 'err', 'Selecciona una fecha disponible.'); return; }
   if (!horaSeleccionada) { showAlert('alert-p2', 'err', 'Selecciona un horario.'); return; }
@@ -341,13 +395,12 @@ document.getElementById('btn-paso3').addEventListener('click', function() {
   var nombre = document.getElementById('p-nombre').value.trim();
   var apellido = document.getElementById('p-apellido').value.trim();
   var partes = fechaSeleccionada.split('-');
-  var fechaObj = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
-  var fechaFmt = fechaObj.toLocaleDateString('es-DO', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  var fechaFmt = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]))
+    .toLocaleDateString('es-DO', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   document.getElementById('resumen').innerHTML =
     '<div class="res-row"><span class="res-key">Paciente</span><span class="res-val">' + nombre + ' ' + apellido + '</span></div>' +
-    '<div class="res-row"><span class="res-key">Cédula</span><span class="res-val">' + (document.getElementById('p-cedula').value || '—') + '</span></div>' +
     '<div class="res-row"><span class="res-key">Teléfono</span><span class="res-val">' + document.getElementById('p-tel').value + '</span></div>' +
-    '<div class="res-row"><span class="res-key">Correo</span><span class="res-val">' + (document.getElementById('p-email').value || '—') + '</span></div>' +
+    '<div class="res-row"><span class="res-key">Correo</span><span class="res-val">' + document.getElementById('p-email').value + '</span></div>' +
     '<div class="res-row"><span class="res-key">Tipo</span><span class="res-val">' + document.getElementById('p-tipo').value + '</span></div>' +
     '<div class="res-row"><span class="res-key">Motivo</span><span class="res-val">' + (document.getElementById('p-motivo').value || '—') + '</span></div>' +
     '<div class="res-row"><span class="res-key">Fecha</span><span class="res-val" style="text-transform:capitalize;">' + fechaFmt + '</span></div>' +
@@ -355,140 +408,107 @@ document.getElementById('btn-paso3').addEventListener('click', function() {
   irPaso(3);
 });
 
-document.getElementById('btn-volver2').addEventListener('click', function() { irPaso(1); });
-document.getElementById('btn-volver3').addEventListener('click', function() { irPaso(2); });
-
+// ENVIAR SOLICITUD
 document.getElementById('btn-enviar').addEventListener('click', function() {
   var btn = document.getElementById('btn-enviar');
   btn.innerHTML = '<div class="spinner"></div> Enviando...';
   btn.disabled = true;
-  var datos = {
-    nombre: document.getElementById('p-nombre').value.trim(),
-    apellido: document.getElementById('p-apellido').value.trim(),
-    cedula: document.getElementById('p-cedula').value.trim() || null,
-    fecha_nacimiento: document.getElementById('p-fnac').value || null,
-    sexo: document.getElementById('p-sexo').value || null,
-    telefono: document.getElementById('p-tel').value.trim(),
-    email: document.getElementById('p-email').value.trim() || null,
-    ars: document.getElementById('p-ars').value || null,
-    motivo: document.getElementById('p-motivo').value.trim() || null,
-    tipo_consulta: document.getElementById('p-tipo').value,
-    fecha_solicitada: fechaSeleccionada,
-    hora_solicitada: horaSeleccionada
-  };
   fetch('/api/solicitud', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(datos)
+    body: JSON.stringify({
+      nombre: document.getElementById('p-nombre').value.trim(),
+      apellido: document.getElementById('p-apellido').value.trim(),
+      cedula: document.getElementById('p-cedula').value.trim() || null,
+      fecha_nacimiento: document.getElementById('p-fnac').value || null,
+      sexo: document.getElementById('p-sexo').value || null,
+      telefono: document.getElementById('p-tel').value.trim(),
+      email: document.getElementById('p-email').value.trim(),
+      ars: document.getElementById('p-ars').value || null,
+      motivo: document.getElementById('p-motivo').value.trim() || null,
+      tipo_consulta: document.getElementById('p-tipo').value,
+      fecha_solicitada: fechaSeleccionada,
+      hora_solicitada: horaSeleccionada
+    })
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.ok) {
       document.getElementById('codigo-final').textContent = data.codigo;
       irPaso(4);
     } else {
-      showAlert('alert-p3', 'err', data.error || 'Error al enviar. Intente de nuevo.');
-      btn.innerHTML = 'Enviar solicitud';
-      btn.disabled = false;
+      showAlert('alert-p3', 'err', data.error || 'Error al enviar.');
+      btn.innerHTML = 'Enviar solicitud'; btn.disabled = false;
     }
   }).catch(function() {
-    showAlert('alert-p3', 'err', 'Error de conexión. Verifique su internet.');
-    btn.innerHTML = 'Enviar solicitud';
-    btn.disabled = false;
+    showAlert('alert-p3', 'err', 'Error de conexión.');
+    btn.innerHTML = 'Enviar solicitud'; btn.disabled = false;
   });
 });
 
+// NUEVA SOLICITUD
 document.getElementById('btn-nueva').addEventListener('click', function() {
-  document.getElementById('p-nombre').value = '';
-  document.getElementById('p-apellido').value = '';
-  document.getElementById('p-cedula').value = '';
-  document.getElementById('p-fnac').value = '';
-  document.getElementById('p-tel').value = '';
-  document.getElementById('p-email').value = '';
-  document.getElementById('p-motivo').value = '';
+  ['p-nombre','p-apellido','p-cedula','p-fnac','p-tel','p-email','p-motivo','buscar-cedula'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) { el.value = ''; el.readOnly = false; }
+  });
   document.getElementById('p-sexo').selectedIndex = 0;
   document.getElementById('p-ars').selectedIndex = 0;
   document.getElementById('p-tipo').selectedIndex = 0;
   document.getElementById('chk-consent').checked = false;
+  document.getElementById('resultado-busqueda').innerHTML = '';
+  document.getElementById('datos-titulo').textContent = '📋 Sus datos personales';
+  pacienteEncontrado = null;
   fechaSeleccionada = null; horaSeleccionada = null; horasOcupadas = [];
   document.getElementById('card-horas').style.display = 'none';
   clearAlert('alert-p0'); clearAlert('alert-p1'); clearAlert('alert-p2'); clearAlert('alert-p3');
   irPaso(0);
 });
 
-// Calendario
-document.getElementById('cal-prev').addEventListener('click', function() {
-  calM--; if (calM < 0) { calM = 11; calY--; } renderCal();
-});
-document.getElementById('cal-next').addEventListener('click', function() {
-  calM++; if (calM > 11) { calM = 0; calY++; } renderCal();
-});
+// CALENDARIO
+document.getElementById('cal-prev').addEventListener('click', function() { calM--; if(calM<0){calM=11;calY--;} renderCal(); });
+document.getElementById('cal-next').addEventListener('click', function() { calM++; if(calM>11){calM=0;calY++;} renderCal(); });
 
 function renderCal() {
   document.getElementById('cal-mes').textContent = MESES[calM] + ' ' + calY;
-  var dow = document.getElementById('cal-dow');
-  dow.innerHTML = '';
-  DIAS.forEach(function(d) {
-    var div = document.createElement('div');
-    div.className = 'cal-dow'; div.textContent = d; dow.appendChild(div);
-  });
+  var dow = document.getElementById('cal-dow'); dow.innerHTML = '';
+  DIAS.forEach(function(d) { var div = document.createElement('div'); div.className='cal-dow'; div.textContent=d; dow.appendChild(div); });
   var grid = document.getElementById('cal-days'); grid.innerHTML = '';
-  var first = new Date(calY, calM, 1).getDay();
-  var dim = new Date(calY, calM+1, 0).getDate();
-  var dimp = new Date(calY, calM, 0).getDate();
+  var first = new Date(calY,calM,1).getDay(), dim = new Date(calY,calM+1,0).getDate(), dimp = new Date(calY,calM,0).getDate();
   var cells = [];
-  for (var i = first-1; i >= 0; i--) cells.push({d: dimp-i, cur: false});
-  for (var d2 = 1; d2 <= dim; d2++) cells.push({d: d2, cur: true});
-  while (cells.length % 7 !== 0) cells.push({d: cells.length-dim-first+1, cur: false});
-  var hoyDate = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  for (var i=first-1;i>=0;i--) cells.push({d:dimp-i,cur:false});
+  for (var d2=1;d2<=dim;d2++) cells.push({d:d2,cur:true});
+  while(cells.length%7!==0) cells.push({d:cells.length-dim-first+1,cur:false});
+  var hoyDate = new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
   cells.forEach(function(cell) {
-    var div = document.createElement('div'); div.className = 'cal-day';
-    if (!cell.cur) { div.classList.add('other'); div.textContent = String(cell.d); grid.appendChild(div); return; }
-    var key = calY + '-' + String(calM+1).padStart(2,'0') + '-' + String(cell.d).padStart(2,'0');
-    var fecha = new Date(calY, calM, cell.d);
-    var isPast = fecha < hoyDate;
-    var isToday = fecha.getTime() === hoyDate.getTime();
-    var isWeekend = fecha.getDay() === 0 || fecha.getDay() === 6;
+    var div = document.createElement('div'); div.className='cal-day';
+    if (!cell.cur) { div.classList.add('other'); div.textContent=String(cell.d); grid.appendChild(div); return; }
+    var key = calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(cell.d).padStart(2,'0');
+    var fecha = new Date(calY,calM,cell.d);
+    var isPast = fecha<hoyDate, isToday = fecha.getTime()===hoyDate.getTime(), isWeekend = fecha.getDay()===0||fecha.getDay()===6;
     if (isToday) div.classList.add('today');
-    if (key === fechaSeleccionada) div.classList.add('selected');
-    if (isPast) { div.classList.add('past'); div.textContent = String(cell.d); grid.appendChild(div); return; }
-    if (isWeekend) { div.classList.add('weekend'); div.textContent = String(cell.d); grid.appendChild(div); return; }
+    if (key===fechaSeleccionada) div.classList.add('selected');
+    if (isPast||isWeekend) { div.classList.add(isWeekend?'weekend':'past'); div.textContent=String(cell.d); grid.appendChild(div); return; }
     div.textContent = String(cell.d);
-    div.addEventListener('click', function(k, dy) {
-      return function() { seleccionarFecha(k, dy); };
-    }(key, cell.d));
+    div.addEventListener('click', (function(k,dy) { return function() { seleccionarFecha(k,dy); }; }(key,cell.d)));
     grid.appendChild(div);
   });
 }
 
 function seleccionarFecha(key, d) {
-  fechaSeleccionada = key; horaSeleccionada = null;
-  renderCal();
-  fetch('/api/disponibilidad/' + key)
-    .then(function(r) { return r.json(); })
-    .then(function(data) { horasOcupadas = data.ocupadas || []; renderHoras(d); })
-    .catch(function() { horasOcupadas = []; renderHoras(d); });
+  fechaSeleccionada = key; horaSeleccionada = null; renderCal();
+  fetch('/api/disponibilidad/'+key).then(function(r){return r.json();}).then(function(data){horasOcupadas=data.ocupadas||[];renderHoras(d);}).catch(function(){horasOcupadas=[];renderHoras(d);});
   clearAlert('alert-p2');
 }
 
 function renderHoras(d) {
-  var card = document.getElementById('card-horas'); card.style.display = 'block';
-  document.getElementById('fecha-sel-label').textContent = d + ' de ' + MESES[calM];
-  var grid = document.getElementById('hora-grid'); grid.innerHTML = '';
+  var card = document.getElementById('card-horas'); card.style.display='block';
+  document.getElementById('fecha-sel-label').textContent = d+' de '+MESES[calM];
+  var grid = document.getElementById('hora-grid'); grid.innerHTML='';
   HORAS.forEach(function(h) {
     var btn = document.createElement('button');
-    var ocup = horasOcupadas.indexOf(h) >= 0;
-    var sel = horaSeleccionada === h;
-    btn.className = 'hora-btn' + (ocup ? ' hora-ocupada' : '') + (sel ? ' hora-sel' : '');
-    btn.textContent = h + (ocup ? ' ✗' : '');
-    if (ocup) { btn.disabled = true; }
-    else {
-      btn.addEventListener('click', function(hora) {
-        return function() {
-          horaSeleccionada = hora;
-          renderHoras(d);
-          clearAlert('alert-p2');
-        };
-      }(h));
-    }
+    var ocup = horasOcupadas.indexOf(h)>=0, sel = horaSeleccionada===h;
+    btn.className = 'hora-btn'+(ocup?' hora-ocupada':'')+(sel?' hora-sel':'');
+    btn.textContent = h+(ocup?' ✗':'');
+    if (ocup) { btn.disabled=true; }
+    else { btn.addEventListener('click', (function(hora,dy){ return function(){ horaSeleccionada=hora; renderHoras(dy); clearAlert('alert-p2'); }; }(h,d))); }
     grid.appendChild(btn);
   });
 }
