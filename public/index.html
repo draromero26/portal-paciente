@@ -299,7 +299,7 @@ const HORAS = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','14:00','
 
 let hoy = new Date();
 let calY = hoy.getFullYear(), calM = hoy.getMonth();
-let selFecha = null, selHora = null;
+let selFecha = null, horaSeleccionada = null;
 let horasOcupadas = [];
 
 // STEPS
@@ -355,7 +355,7 @@ function irPaso2() {
 
 function irPaso3() {
   if (!selFecha) { showAlert('alert-p2','err','Selecciona una fecha disponible.'); return; }
-  if (!selHora) { showAlert('alert-p2','err','Selecciona un horario.'); return; }
+  if (!horaSeleccionada) { showAlert('alert-p2','err','Selecciona un horario.'); return; }
   clearAlert('alert-p2');
   const nombre = document.getElementById('p-nombre').value.trim();
   const apellido = document.getElementById('p-apellido').value.trim();
@@ -368,7 +368,7 @@ function irPaso3() {
     <div class="res-row"><span class="res-key">Tipo de consulta</span><span class="res-val">${document.getElementById('p-tipo').value}</span></div>
     <div class="res-row"><span class="res-key">Motivo</span><span class="res-val">${document.getElementById('p-motivo').value||'—'}</span></div>
     <div class="res-row"><span class="res-key">Fecha</span><span class="res-val" style="text-transform:capitalize;">${fecha}</span></div>
-    <div class="res-row"><span class="res-key">Hora</span><span class="res-val">${selHora}</span></div>`;
+    <div class="res-row"><span class="res-key">Hora</span><span class="res-val">${horaSeleccionada}</span></div>`;
   irPaso(3);
 }
 
@@ -392,7 +392,7 @@ async function enviarSolicitud() {
         motivo: document.getElementById('p-motivo').value.trim()||null,
         tipo_consulta: document.getElementById('p-tipo').value,
         fecha_solicitada: selFecha,
-        hora_solicitada: selHora
+        hora_solicitada: horaSeleccionada
       })
     });
     const data = await resp.json();
@@ -452,7 +452,7 @@ function renderCal() {
 }
 
 async function seleccionarFecha(key, d) {
-  selFecha = key; selHora = null;
+  selFecha = key; horaSeleccionada = null;
   renderCal();
   // Obtener horas ocupadas del servidor
   try {
@@ -471,15 +471,15 @@ function renderHoras(key, d) {
   const grid = document.getElementById('hora-grid');
   grid.innerHTML = HORAS.map(h => {
     const ocup = horasOcupadas.includes(h);
-    const sel = selHora===h;
+    const sel = horaSeleccionada===h;
     return `<button class="hora-btn${ocup?' hora-ocupada':''}${sel?' hora-sel':''}"
-      onclick="${ocup?'':''}" ${ocup?'disabled':'onclick="selHora(\''+h+'\')"'}
+      onclick="${ocup?'':''}" ${ocup?'disabled':'onclick="elegirHora('" +h+ "')"'}
       aria-label="${h}${ocup?' ocupado':''}">${h}${ocup?'<br>✗':''}</button>`;
   }).join('');
 }
 
-function selHora(h) {
-  selHora = h;
+function elegirHora(h) {
+  horaSeleccionada = h;
   renderHoras(selFecha, new Date(selFecha+'T12:00:00').getDate());
   clearAlert('alert-p2');
 }
@@ -491,7 +491,7 @@ function reiniciar() {
   // Desmarcar consentimiento
   const chk = document.getElementById('chk-consentimiento');
   if (chk) chk.checked = false;
-  selFecha=null; selHora=null; horasOcupadas=[];
+  selFecha=null; horaSeleccionada=null; horasOcupadas=[];
   document.getElementById('card-horas').style.display='none';
   clearAlert('alert-p0'); clearAlert('alert-p1'); clearAlert('alert-p2'); clearAlert('alert-p3');
   irPaso(0);
