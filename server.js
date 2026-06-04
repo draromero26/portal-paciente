@@ -2,19 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Base de datos en memoria con persistencia en JSON
-const fs = require('fs');
 const DB_FILE = path.join('/tmp', 'portal-db.json');
 
 function loadDB() {
   try {
     if (fs.existsSync(DB_FILE)) return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } catch(e) {}
-  return { solicitudes: [], horas_bloqueadas: [], next_id: 1 };
+  return { solicitudes: [], horas_bloqueadas: [], pacientes: [], next_id: 1 };
 }
 
 function saveDB(db) {
@@ -35,10 +33,49 @@ function authCheck(req, res) {
   return true;
 }
 
-// Obtener horas ocupadas para una fecha
-app.get('/api/disponibilidad/:fecha', (req, res) => {
-  const { fecha } = req.params;
+// ===== BUSCAR PACIENTE POR CÉDULA =====
+app.get('/api/paciente/:cedula', (req, res) => {
   DB = loadDB();
+  const cedula = req.params.cedula.replace(/[^0-9]/g, ''); // solo números
+  const paciente = DB.pacientes.find(p => {
+    const pc = (p.cedula || '').replace(/[^0-9]/g, '');
+    return pc === cedula && cedula.length >= 6;
+  });
+  if (paciente) {
+    res.json({ ok: true, existe: true, paciente });
+  } else {
+    res.json({ ok: true, existe: false });
+  }
+});
+
+// ===== SINCRONIZAR PACIENTE DESDE LA APP =====
+app.post('/api/paciente/sync', (req, res) => {
+  if (!authCheck(req, res)) return;
+  DB = loadDB();
+  const p = req.body;
+  if (!p.cedula) return res.json({ ok: false, error: 'Cédula requerida.' });
+  const cedula = p.cedula.replace(/[^0-9]/g, '');
+  const idx = DB.pacientes.findIndex(x => (x.cedula||'').replace(/[^0-9]/g,'') === cedula);
+  const paciente = {
+    nombre: p.nombre || '',
+    apellido: p.apellido || '',
+    cedula: p.cedula,
+    fecha_nacimiento: p.fecha_nacimiento || null,
+    sexo: p.sexo || null,
+    telefono: p.telefono || null,
+    email: p.email || null,
+    ars: p.ars || null,
+  };
+  if (idx >= 0) { DB.pacientes[idx] = paciente; }
+  else { DB.pacientes.push(paciente); }
+  saveDB(DB);
+  res.json({ ok: true });
+});
+
+// ===== DISPONIBILIDAD =====
+app.get('/api/disponibilidad/:fecha', (req, res) => {
+  DB = loadDB();
+  const { fecha } = req.params;
   const ocupadas = DB.solicitudes
     .filter(s => s.fecha_solicitada === fecha && s.status !== 'cancelada')
     .map(s => s.hora_solicitada);
@@ -48,7 +85,7 @@ app.get('/api/disponibilidad/:fecha', (req, res) => {
   res.json({ ocupadas: [...new Set([...ocupadas, ...bloqueadas])] });
 });
 
-// Crear solicitud
+// ===== CREAR SOLICITUD =====
 app.post('/api/solicitud', (req, res) => {
   DB = loadDB();
   const { nombre, apellido, cedula, fecha_nacimiento, sexo,
@@ -80,20 +117,29 @@ app.post('/api/solicitud', (req, res) => {
     created_at: new Date().toISOString()
   };
   DB.solicitudes.push(solicitud);
-  saveDB(DB);
 
+  // Actualizar o crear paciente en el cache
+  if (cedula) {
+    const ced = cedula.replace(/[^0-9]/g, '');
+    const pidx = DB.pacientes.findIndex(x => (x.cedula||'').replace(/[^0-9]/g,'') === ced);
+    const pt = { nombre, apellido, cedula, fecha_nacimiento: fecha_nacimiento||null,
+                 sexo: sexo||null, telefono, email: email||null, ars: ars||null };
+    if (pidx >= 0) DB.pacientes[pidx] = pt;
+    else DB.pacientes.push(pt);
+  }
+
+  saveDB(DB);
   if (email) enviarConfirmacion(solicitud);
   res.json({ ok: true, codigo });
 });
 
-// Obtener todas las solicitudes (para la app)
+// ===== SOLICITUDES (para la app) =====
 app.get('/api/solicitudes', (req, res) => {
   if (!authCheck(req, res)) return;
   DB = loadDB();
   res.json({ ok: true, solicitudes: DB.solicitudes });
 });
 
-// Actualizar status
 app.patch('/api/solicitud/:id', (req, res) => {
   if (!authCheck(req, res)) return;
   DB = loadDB();
@@ -105,7 +151,7 @@ app.patch('/api/solicitud/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// Bloquear hora
+// ===== BLOQUEAR HORA =====
 app.post('/api/bloquear', (req, res) => {
   if (!authCheck(req, res)) return;
   DB = loadDB();
@@ -115,7 +161,7 @@ app.post('/api/bloquear', (req, res) => {
   res.json({ ok: true });
 });
 
-// Correo
+// ===== CORREO =====
 async function enviarConfirmacion(s) {
   try {
     const gmailUser = process.env.GMAIL_USUARIO;
@@ -128,30 +174,25 @@ async function enviarConfirmacion(s) {
       weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
     });
     await transporter.sendMail({
-      from: `"Dra. Nancy Romero" <${gmailUser}>`,
+      from: '"Dra. Nancy Romero" <' + gmailUser + '>',
       to: s.email,
-      subject: `Solicitud de cita recibida — ${fechaFmt}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px;margin:0 auto;">
-          <div style="background:#3A5A40;padding:20px;border-radius:8px 8px 0 0;">
-            <h2 style="color:#FEFAE0;margin:0;">Solicitud de cita recibida</h2>
-            <p style="color:#A3B18A;margin:4px 0 0;">Dra. Nancy Esther Romero Castro · Médico General</p>
-          </div>
-          <div style="background:#FEFAE0;padding:20px;border-radius:0 0 8px 8px;border:1px solid #EEE8D5;">
-            <p>Estimado/a <strong>${s.nombre} ${s.apellido}</strong>,</p>
-            <p>Hemos recibido su solicitud de cita. Le confirmaremos a la brevedad.</p>
-            <div style="background:#F6F1E9;border-radius:8px;padding:14px;margin:16px 0;">
-              <p style="margin:4px 0;"><strong>Fecha:</strong> ${fechaFmt}</p>
-              <p style="margin:4px 0;"><strong>Hora:</strong> ${s.hora_solicitada}</p>
-              <p style="margin:4px 0;"><strong>Tipo:</strong> ${s.tipo_consulta}</p>
-              <p style="margin:4px 0;"><strong>Código:</strong> ${s.codigo}</p>
-            </div>
-            <p style="font-size:12px;color:#94A3B8;">Guarde este código para cualquier consulta.</p>
-            <hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">
-            <p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General<br>
-            Exequátur 118-25 · CMD 57053</p>
-          </div>
-        </div>`
+      subject: 'Solicitud de cita recibida — ' + fechaFmt,
+      html: '<div style="font-family:sans-serif;max-width:500px;margin:0 auto;">' +
+        '<div style="background:#3A5A40;padding:20px;border-radius:8px 8px 0 0;">' +
+        '<h2 style="color:#FEFAE0;margin:0;">Solicitud de cita recibida</h2>' +
+        '<p style="color:#A3B18A;margin:4px 0 0;">Dra. Nancy Esther Romero Castro · Médico General</p></div>' +
+        '<div style="background:#FEFAE0;padding:20px;border-radius:0 0 8px 8px;border:1px solid #EEE8D5;">' +
+        '<p>Estimado/a <strong>' + s.nombre + ' ' + s.apellido + '</strong>,</p>' +
+        '<p>Hemos recibido su solicitud de cita.</p>' +
+        '<div style="background:#F6F1E9;border-radius:8px;padding:14px;margin:16px 0;">' +
+        '<p style="margin:4px 0;"><strong>Fecha:</strong> ' + fechaFmt + '</p>' +
+        '<p style="margin:4px 0;"><strong>Hora:</strong> ' + s.hora_solicitada + '</p>' +
+        '<p style="margin:4px 0;"><strong>Tipo:</strong> ' + s.tipo_consulta + '</p>' +
+        '<p style="margin:4px 0;"><strong>Código:</strong> ' + s.codigo + '</p></div>' +
+        '<p style="font-size:12px;color:#94A3B8;">Guarde este código para cualquier consulta.</p>' +
+        '<hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">' +
+        '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General<br>' +
+        'Exequátur 118-25 · CMD 57053</p></div></div>'
     });
   } catch(e) { console.error('Error correo:', e.message); }
 }
@@ -160,4 +201,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => console.log(`Portal corriendo en puerto ${PORT}`));
+app.listen(PORT, () => console.log('Portal corriendo en puerto ' + PORT));
