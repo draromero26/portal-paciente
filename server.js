@@ -85,6 +85,101 @@ app.get('/api/disponibilidad/:fecha', (req, res) => {
   res.json({ ocupadas: [...new Set([...ocupadas, ...bloqueadas])] });
 });
 
+// ===== SINCRONIZAR CITAS DESDE LA APP =====
+app.post('/api/citas/sync', (req, res) => {
+  if (!authCheck(req, res)) return;
+  DB = loadDB();
+  if (!DB.citas) DB.citas = [];
+
+  const citas = req.body.citas || [];
+  // Reemplazar todas las citas con las del request (la app es source of truth)
+  DB.citas = citas.map(c => ({
+    id: c.id,
+    paciente_nombre: c.paciente,
+    paciente_email: c.email || null,
+    telefono: c.telefono,
+    fecha: c.fecha,
+    hora: c.hora,
+    tipo: c.tipo,
+    status: c.status,
+    recordatorio_enviado: c.recordatorio_enviado || null
+  }));
+  saveDB(DB);
+  res.json({ ok: true, recibidas: citas.length });
+});
+
+// ===== CRON: ENVIAR RECORDATORIOS DEL DÍA SIGUIENTE =====
+app.post('/api/cron/recordatorios', async (req, res) => {
+  if (!authCheck(req, res)) return;
+  DB = loadDB();
+  if (!DB.citas) DB.citas = [];
+
+  // Calcular fecha del día siguiente
+  const manana = new Date();
+  manana.setDate(manana.getDate() + 1);
+  const fechaManana = manana.toISOString().split('T')[0];
+
+  // Filtrar citas: del día siguiente, confirmadas o pendientes, sin recordatorio aún
+  const elegibles = DB.citas.filter(c =>
+    c.fecha === fechaManana &&
+    (c.status === 'confirmada' || c.status === 'pendiente') &&
+    c.paciente_email &&
+    !c.recordatorio_enviado
+  );
+
+  let enviados = 0, fallos = 0;
+  for (const cita of elegibles) {
+    try {
+      await enviarRecordatorio(cita);
+      cita.recordatorio_enviado = new Date().toISOString();
+      enviados++;
+    } catch(e) {
+      console.error('Error recordatorio cita', cita.id, ':', e.message);
+      fallos++;
+    }
+  }
+  saveDB(DB);
+  res.json({ ok: true, fecha: fechaManana, total: elegibles.length, enviados, fallos });
+});
+
+// Función auxiliar para enviar recordatorio
+async function enviarRecordatorio(cita) {
+  const gmailUser = process.env.GMAIL_USUARIO;
+  const gmailPass = process.env.GMAIL_PASSWORD;
+  if (!gmailUser || !gmailPass) throw new Error('Sin configuración Gmail');
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: gmailUser, pass: gmailPass }
+  });
+
+  const fechaFmt = new Date(cita.fecha + 'T12:00:00').toLocaleDateString('es-DO', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+
+  await transporter.sendMail({
+    from: '"Dra. Nancy Romero" <' + gmailUser + '>',
+    to: cita.paciente_email,
+    subject: 'Recordatorio: tiene cita mañana - ' + fechaFmt,
+    html: '<div style="font-family:sans-serif;max-width:500px;margin:0 auto;">' +
+      '<div style="background:#3A5A40;padding:20px;border-radius:8px 8px 0 0;">' +
+      '<h2 style="color:#FEFAE0;margin:0;">🔔 Recordatorio de cita</h2>' +
+      '<p style="color:rgba(254,250,224,.8);margin:4px 0 0;">Dra. Nancy Esther Romero Castro · Médico General</p></div>' +
+      '<div style="background:#FEFAE0;padding:20px;border-radius:0 0 8px 8px;border:1px solid #EEE8D5;">' +
+      '<p>Estimado/a <strong>' + (cita.paciente_nombre || 'paciente') + '</strong>,</p>' +
+      '<p>Le recordamos que tiene una cita programada para <strong>mañana</strong>:</p>' +
+      '<div style="background:#F6F1E9;border-radius:8px;padding:14px;margin:16px 0;">' +
+      '<p style="margin:4px 0;"><strong>Fecha:</strong> ' + fechaFmt + '</p>' +
+      '<p style="margin:4px 0;"><strong>Hora:</strong> ' + cita.hora + '</p>' +
+      '<p style="margin:4px 0;"><strong>Tipo:</strong> ' + (cita.tipo || 'Consulta') + '</p>' +
+      '</div>' +
+      '<p style="font-size:13px;color:#475569;">Por favor llegue 10 minutos antes de su cita. Si no puede asistir, le agradeceremos cancelarla con anticipación.</p>' +
+      '<hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">' +
+      '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General<br>' +
+      'Exequátur 118-25 · CMD 57053</p></div></div>'
+  });
+}
+
 // ===== CREAR SOLICITUD =====
 app.post('/api/solicitud', (req, res) => {
   DB = loadDB();
