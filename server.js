@@ -175,8 +175,7 @@ async function enviarRecordatorio(cita) {
       '</div>' +
       '<p style="font-size:13px;color:#475569;">Por favor llegue 10 minutos antes de su cita. Si no puede asistir, le agradeceremos cancelarla con anticipación.</p>' +
       '<hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">' +
-      '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General<br>' +
-      'Exequátur 118-25 · CMD 57053</p></div></div>'
+      '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General</p></div></div>'
   });
 }
 
@@ -286,8 +285,7 @@ async function enviarConfirmacion(s) {
         '<p style="margin:4px 0;"><strong>Código:</strong> ' + s.codigo + '</p></div>' +
         '<p style="font-size:12px;color:#94A3B8;">Guarde este código para cualquier consulta.</p>' +
         '<hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">' +
-        '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General<br>' +
-        'Exequátur 118-25 · CMD 57053</p></div></div>'
+        '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General</p></div></div>'
     });
   } catch(e) { console.error('Error correo:', e.message); }
 }
