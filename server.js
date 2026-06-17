@@ -270,20 +270,23 @@ async function enviarConfirmacion(s) {
     await transporter.sendMail({
       from: '"Dra. Nancy Romero" <' + gmailUser + '>',
       to: s.email,
-      subject: 'Solicitud de cita recibida — ' + fechaFmt,
+      subject: '⏳ Solicitud recibida (pendiente de aprobación) — ' + fechaFmt,
       html: '<div style="font-family:sans-serif;max-width:500px;margin:0 auto;">' +
-        '<div style="background:#3A5A40;padding:20px;border-radius:8px 8px 0 0;">' +
-        '<h2 style="color:#FEFAE0;margin:0;">Solicitud de cita recibida</h2>' +
-        '<p style="color:#A3B18A;margin:4px 0 0;">Dra. Nancy Esther Romero Castro · Médico General</p></div>' +
+        '<div style="background:#D97706;padding:20px;border-radius:8px 8px 0 0;">' +
+        '<h2 style="color:#FEFAE0;margin:0;">⏳ Solicitud pendiente de aprobación</h2>' +
+        '<p style="color:rgba(254,250,224,.85);margin:4px 0 0;">Dra. Nancy Esther Romero Castro · Médico General</p></div>' +
         '<div style="background:#FEFAE0;padding:20px;border-radius:0 0 8px 8px;border:1px solid #EEE8D5;">' +
         '<p>Estimado/a <strong>' + s.nombre + ' ' + s.apellido + '</strong>,</p>' +
-        '<p>Hemos recibido su solicitud de cita.</p>' +
+        '<div style="background:#FEF3C7;border-left:4px solid #D97706;padding:12px;margin:16px 0;border-radius:4px;">' +
+        '<p style="margin:0;color:#92400E;font-weight:600;">⚠ ESTO NO ES UNA CONFIRMACIÓN</p>' +
+        '<p style="margin:6px 0 0;font-size:13px;color:#78350F;">Hemos recibido su solicitud, pero aún debe ser aprobada por la Dra. Romero. Le enviaremos otro correo cuando la cita esté <strong>confirmada o rechazada</strong>.</p></div>' +
+        '<p>Estos son los datos de su solicitud:</p>' +
         '<div style="background:#F6F1E9;border-radius:8px;padding:14px;margin:16px 0;">' +
-        '<p style="margin:4px 0;"><strong>Fecha:</strong> ' + fechaFmt + '</p>' +
-        '<p style="margin:4px 0;"><strong>Hora:</strong> ' + s.hora_solicitada + '</p>' +
+        '<p style="margin:4px 0;"><strong>Fecha solicitada:</strong> ' + fechaFmt + '</p>' +
+        '<p style="margin:4px 0;"><strong>Hora solicitada:</strong> ' + s.hora_solicitada + '</p>' +
         '<p style="margin:4px 0;"><strong>Tipo:</strong> ' + s.tipo_consulta + '</p>' +
-        '<p style="margin:4px 0;"><strong>Código:</strong> ' + s.codigo + '</p></div>' +
-        '<p style="font-size:12px;color:#94A3B8;">Guarde este código para cualquier consulta.</p>' +
+        '<p style="margin:4px 0;"><strong>Código de referencia:</strong> ' + s.codigo + '</p></div>' +
+        '<p style="font-size:12px;color:#94A3B8;">Guarde este código para cualquier consulta. Espere el correo de confirmación o rechazo antes de presentarse.</p>' +
         '<hr style="border:none;border-top:1px solid #EEE8D5;margin:16px 0;">' +
         '<p style="font-size:12px;color:#94A3B8;">Dra. Nancy Esther Romero Castro — Médico General</p></div></div>'
     });
