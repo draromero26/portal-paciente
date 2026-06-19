@@ -76,13 +76,75 @@ app.post('/api/paciente/sync', (req, res) => {
 app.get('/api/disponibilidad/:fecha', (req, res) => {
   DB = loadDB();
   const { fecha } = req.params;
-  const ocupadas = DB.solicitudes
+
+  // 1. Solicitudes pendientes/confirmadas del portal
+  const ocupadasPortal = DB.solicitudes
     .filter(s => s.fecha_solicitada === fecha && s.status !== 'cancelada')
     .map(s => s.hora_solicitada);
+
+  // 2. Citas sincronizadas desde la app (confirmadas/pendientes)
+  const citasApp = (DB.citas || [])
+    .filter(c => c.fecha === fecha && c.status !== 'cancelada')
+    .map(c => c.hora);
+
+  // 3. Bloqueos manuales (días completos u horas específicas)
   const bloqueadas = DB.horas_bloqueadas
     .filter(b => b.fecha === fecha)
     .map(b => b.hora);
-  res.json({ ocupadas: [...new Set([...ocupadas, ...bloqueadas])] });
+
+  // 4. FIX 1: Bloqueo automático de horas pasadas
+  // Si la fecha solicitada es HOY, bloquear todas las horas anteriores a la hora actual
+  // Tolerancia: bloquear también la próxima hora si estamos a menos de 30min
+  const todasLasHoras = [];
+  try {
+    // Generar todas las horas posibles del día (08:00-11:00 y 14:00-16:00)
+    for (let h = 8; h <= 11; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        if (h === 11 && m > 0) break;
+        todasLasHoras.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'));
+      }
+    }
+    for (let h = 14; h <= 16; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        if (h === 16 && m > 0) break;
+        todasLasHoras.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'));
+      }
+    }
+  } catch(e) {}
+
+  const horasPasadas = [];
+  try {
+    // Obtener fecha/hora actual en zona América/Santo_Domingo
+    const ahora = new Date();
+    // Obtener componentes en zona Santo_Domingo (UTC-4)
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santo_Domingo',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    const partes = {};
+    fmt.formatToParts(ahora).forEach(p => { if (p.type !== 'literal') partes[p.type] = p.value; });
+    const fechaHoy = partes.year + '-' + partes.month + '-' + partes.day;
+    const horaActual = parseInt(partes.hour) * 60 + parseInt(partes.minute); // minutos desde 00:00
+
+    if (fecha === fechaHoy) {
+      // Bloquear todas las horas <= hora actual + 30min de margen
+      todasLasHoras.forEach(h => {
+        const [hh, mm] = h.split(':').map(Number);
+        const minutosSlot = hh * 60 + mm;
+        if (minutosSlot <= horaActual + 30) {
+          horasPasadas.push(h);
+        }
+      });
+    } else if (fecha < fechaHoy) {
+      // Fecha pasada completa: bloquear todo
+      horasPasadas.push(...todasLasHoras);
+    }
+  } catch(e) { console.error('Error calculando horas pasadas:', e); }
+
+  res.json({
+    ocupadas: [...new Set([...ocupadasPortal, ...citasApp, ...bloqueadas, ...horasPasadas])]
+  });
 });
 
 // ===== SINCRONIZAR CITAS DESDE LA APP =====
